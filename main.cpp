@@ -44,7 +44,7 @@ void displayBoard(const int board[8][8]) {
 // creates new board
 void createBoard(int board[8][8]) {
 
-    // black_pawns pola
+    // black_pieces pola
     board[0][3] = board[1][1] = board[1][6] = 1;
     board[2][4] = board[3][2] = board[3][7] = 1;
     board[4][0] = board[4][5] = board[5][3] = 1;
@@ -179,24 +179,24 @@ bool isCorrectMove(const int move[4], int board[8][8]) {
     return true;
 }
 
-// updates pawns' positions
-void executeMove(const int move[4], int pawns[3][2], int board[8][8],
+// updates pieces' positions
+void executeMove(const int move[4], int pieces[3][2], int board[8][8],
                  const int player) {
 
     board[move[0]][move[1]] = 0;
     board[move[2]][move[3]] = player;
 
     for (int i = 0; i < 3; i++) {
-        if (move[0] == pawns[i][0] && move[1] == pawns[i][1]) {
-            pawns[i][0] = move[2];
-            pawns[i][1] = move[3];
+        if (move[0] == pieces[i][0] && move[1] == pieces[i][1]) {
+            pieces[i][0] = move[2];
+            pieces[i][1] = move[3];
             break;
         }
     }
 }
 
 // calculates the assessment vaulue of the current state for the given player
-int calculateStateValue(const int board[8][8], const int pawns[3][2],
+int calculateStateValue(const int board[8][8], const int pieces[3][2],
                         const int player) {
 
     int state_value = 0;
@@ -205,27 +205,27 @@ int calculateStateValue(const int board[8][8], const int pawns[3][2],
     const int final_positions[2][3][2] = {{{0, 7}, {1, 7}, {2, 7}},
                                           {{5, 0}, {6, 0}, {7, 0}}};
 
-    for (int pawn = 0; pawn < 3; pawn++) {
+    for (int piece = 0; piece < 3; piece++) {
 
         int d[8][8]{};
 
-        int pawn_x = pawns[pawn][0];
-        int pawn_y = pawns[pawn][1];
+        int piece_x = pieces[piece][0];
+        int piece_y = pieces[piece][1];
 
         queue<pair<int, int>> Q;
-        Q.push(make_pair(pawn_x, pawn_y));
-        d[pawn_x][pawn_y] = 1;
+        Q.push(make_pair(piece_x, piece_y));
+        d[piece_x][piece_y] = 1;
 
         while (!Q.empty()) {
 
-            pawn_x = Q.front().first;
-            pawn_y = Q.front().second;
+            piece_x = Q.front().first;
+            piece_y = Q.front().second;
             Q.pop();
 
             for (int direction_num = 0; direction_num < 8; direction_num++) {
 
-                int x = pawn_x;
-                int y = pawn_y;
+                int x = piece_x;
+                int y = piece_y;
                 int dx = direction[direction_num][0];
                 int dy = direction[direction_num][1];
                 while (
@@ -235,7 +235,7 @@ int calculateStateValue(const int board[8][8], const int pawns[3][2],
                     y += dy;
 
                     if (d[x][y] == 0) {
-                        d[x][y] = d[pawn_x][pawn_y] + 1;
+                        d[x][y] = d[piece_x][piece_y] + 1;
                         Q.push(make_pair(x, y));
                     }
                 }
@@ -249,8 +249,8 @@ int calculateStateValue(const int board[8][8], const int pawns[3][2],
             int final_position_x = final_positions[player - 2][i][0];
             int final_position_y = final_positions[player - 2][i][1];
 
-            if (pawns[pawn][0] == final_position_x &&
-                pawns[pawn][1] == final_position_y)
+            if (pieces[piece][0] == final_position_x &&
+                pieces[piece][1] == final_position_y)
                 state_value -= 100;
 
             if (d[final_position_x][final_position_y] != 0 &&
@@ -266,8 +266,8 @@ int calculateStateValue(const int board[8][8], const int pawns[3][2],
 }
 
 // finds an optimal move for AI player
-void moveAI(int move[4], int board[8][8], int black_pawns[3][2],
-            int white_pawns[3][2]) {
+void moveAI(int move[4], int board[8][8], int black_pieces[3][2],
+            int white_pieces[3][2]) {
 
     int min_value = 1000;
     const int direction[8][2] = {{0, 1}, {1, 0},  {0, -1},  {-1, 0},
@@ -275,11 +275,11 @@ void moveAI(int move[4], int board[8][8], int black_pawns[3][2],
     int found_moves[100][4];
     int moves_number = 0;
 
-    for (int pawn = 0; pawn < 3; pawn++) {
+    for (int piece = 0; piece < 3; piece++) {
         for (int direction_num = 0; direction_num < 8; direction_num++) {
 
-            int x = black_pawns[pawn][0];
-            int y = black_pawns[pawn][1];
+            int x = black_pieces[piece][0];
+            int y = black_pieces[piece][1];
             const int previous_x = x;
             const int previous_y = y;
             int dx = direction[direction_num][0];
@@ -296,9 +296,9 @@ void moveAI(int move[4], int board[8][8], int black_pawns[3][2],
                 move[2] = x;
                 move[3] = y;
 
-                executeMove(move, black_pawns, board, 3);
+                executeMove(move, black_pieces, board, 3);
 
-                int value = calculateStateValue(board, black_pawns, 3);
+                int value = calculateStateValue(board, black_pieces, 3);
 
                 if (value < min_value) {
 
@@ -319,7 +319,7 @@ void moveAI(int move[4], int board[8][8], int black_pawns[3][2],
                 move[2] = previous_x;
                 move[3] = previous_y;
 
-                executeMove(move, black_pawns, board, 3);
+                executeMove(move, black_pieces, board, 3);
             }
         }
     }
@@ -351,8 +351,8 @@ int main() {
 
     int board[8][8]{};
     int move[4];
-    int black_pawns[3][2] = {{0, 7}, {1, 7}, {2, 7}};
-    int white_pawns[3][2] = {{5, 0}, {6, 0}, {7, 0}};
+    int black_pieces[3][2] = {{0, 7}, {1, 7}, {2, 7}};
+    int white_pieces[3][2] = {{5, 0}, {6, 0}, {7, 0}};
     createBoard(board);
 
     int winner = 0;
@@ -375,7 +375,7 @@ int main() {
                 correct_move = isCorrectMove(move, board);
         }
 
-        executeMove(move, white_pawns, board, 2);
+        executeMove(move, white_pieces, board, 2);
 
         displayBoard(board);
         cout << "\033[1;31m";
@@ -383,8 +383,8 @@ int main() {
         cout << "\033[0m";
         sleep(1);
 
-        moveAI(move, board, black_pawns, white_pawns);
-        executeMove(move, black_pawns, board, 3);
+        moveAI(move, board, black_pieces, white_pieces);
+        executeMove(move, black_pieces, board, 3);
 
         winner = checkWinner(board);
     }
