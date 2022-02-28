@@ -7,8 +7,8 @@
 
 using namespace std;
 
-// wyswietla aktualny stan planszy
-void wyswietlPlansze(const int p[8][8]) {
+// display current board state
+void displayBoard(const int board[8][8]) {
 
     cout << "\033[2J\033[1;1H";
     cout << "\n\n";
@@ -17,15 +17,20 @@ void wyswietlPlansze(const int p[8][8]) {
         cout << "    " << (char)('A' + y) << " |";
         for (int x = 0; x <= 7; x++) {
 
-            char znak = ' ';
-            if (p[x][y] == 1)
-                znak = '#';
-            else if (p[x][y] == 2)
-                znak = 'B';
-            else if (p[x][y] == 3)
-                znak = 'C';
+            char c = ' ';
+            if (board[x][y] == 1)
+                c = '#';
+            else if (board[x][y] == 2) {
+                cout << "\033[1;34m";
+                c = 'A';
+            } else if (board[x][y] == 3) {
+                c = 'B';
+                cout << "\033[1;31m";
+            }
 
-            cout << znak << "|";
+            cout << c;
+            cout << "\033[0m";
+            cout << "|";
         }
         cout << endl;
     }
@@ -36,112 +41,113 @@ void wyswietlPlansze(const int p[8][8]) {
     cout << endl;
 }
 
-// tworzy nowa plansze
-void nowaPlansza(int p[8][8]) {
+// creates new board
+void createBoard(int board[8][8]) {
 
-    // czarne pola
-    p[0][3] = p[1][1] = p[1][6] = p[2][4] = p[3][2] = p[3][7] = 1;
-    p[4][0] = p[4][5] = p[5][3] = p[6][1] = p[6][6] = p[7][4] = 1;
+    // black_pawns pola
+    board[0][3] = board[1][1] = board[1][6] = 1;
+    board[2][4] = board[3][2] = board[3][7] = 1;
+    board[4][0] = board[4][5] = board[5][3] = 1;
+    board[6][1] = board[6][6] = board[7][4] = 1;
 
-    p[5][0] = p[6][0] = p[7][0] = 2; // piony B
-    p[0][7] = p[1][7] = p[2][7] = 3; // piony C
+    board[5][0] = board[6][0] = board[7][0] = 2; // piony B
+    board[0][7] = board[1][7] = board[2][7] = 3; // piony C
 }
 
-// zmienia oznaczenie wiersza / kolumny na liczbe
-int zmienNaLiczbe(char x) {
+// changes column's char to int
+int columnToNumber(char x) {
 
-    if (x >= 'a' && x <= 'h') // litera 'a' - 'h'
+    if (x >= 'a' && x <= 'h') // letters 'a' - 'h'
         return x - 'a';
-    else if (x >= '0' && x <= '7') // cyfra '0' - '7'
+    else if (x >= '0' && x <= '7') // digits '0' - '7'
         return x - '0';
     else
-        return 0; // blad jesli cos innego
+        return 0; // error if sth else
 }
 
-// sprawdza czy nr wiersza / kolumny jest w odpowiednim zakresie
-bool sprawdzZakres(int x) { return x >= 0 && x <= 7; }
+// checks if column's / row's number is in a correct range
+bool checkRange(int x) { return x >= 0 && x <= 7; }
 
-// wczytuje ruch, zwraca true jesli zostal poprawnie wczytany, a false jesli nie
-bool wczytajRuch(int ruch[4]) {
+// reads input and checks if it's correct
+bool readInput(int move[4]) {
 
-    string wejscie;
-    getline(cin, wejscie); // wczytaj wiersz wejscia
+    string input;
+    getline(cin, input);
 
-    // omin biale znaki, jesli jakies sa
+    // omit white characters
     int r = 0;
-    while (wejscie[r] == '\t' || wejscie[r] == ' ')
+    while (input[r] == '\t' || input[r] == ' ')
         ++r;
 
-    bool poprawny_format = true;
+    bool correct_format = true;
 
-    // wiersz poczatkowy
-    if (isalpha(wejscie[r]) && sprawdzZakres(zmienNaLiczbe(wejscie[r])))
-        ruch[1] = zmienNaLiczbe(wejscie[r++]);
+    // initial row
+    if (isalpha(input[r]) && checkRange(columnToNumber(input[r])))
+        move[1] = columnToNumber(input[r++]);
     else
-        poprawny_format = false;
+        correct_format = false;
 
-    // kolumna poczatkowa
-    if (isdigit(wejscie[r]) && sprawdzZakres(zmienNaLiczbe(wejscie[r])))
-        ruch[0] = zmienNaLiczbe(wejscie[r++]);
+    // initial column
+    if (isdigit(input[r]) && checkRange(columnToNumber(input[r])))
+        move[0] = columnToNumber(input[r++]);
     else
-        poprawny_format = false;
+        correct_format = false;
 
-    // omin biale znaki posrodku
-    while (wejscie[r] == '\t' || wejscie[r] == ' ')
+    // omit white characters
+    while (input[r] == '\t' || input[r] == ' ')
         ++r;
 
-    // wiersz koncowy
-    if (isalpha(wejscie[r]) && sprawdzZakres(zmienNaLiczbe(wejscie[r])))
-        ruch[3] = zmienNaLiczbe(wejscie[r++]);
+    // final row
+    if (isalpha(input[r]) && checkRange(columnToNumber(input[r])))
+        move[3] = columnToNumber(input[r++]);
     else
-        poprawny_format = false;
+        correct_format = false;
 
-    // kolumna koncowa
-    if (isdigit(wejscie[r]) && sprawdzZakres(zmienNaLiczbe(wejscie[r])))
-        ruch[2] = zmienNaLiczbe(wejscie[r++]);
+    // final column
+    if (isdigit(input[r]) && checkRange(columnToNumber(input[r])))
+        move[2] = columnToNumber(input[r++]);
     else
-        poprawny_format = false;
+        correct_format = false;
 
-    // jesli jest cos poza tym, wejscie jest niepoprawne
-    while (wejscie[r]) {
-        if (wejscie[r] != ' ' && wejscie[r] != '\t' && wejscie[r] != '\n')
-            poprawny_format = false;
+    while (input[r]) {
+        if (input[r] != ' ' && input[r] != '\t' && input[r] != '\n')
+            correct_format = false;
         ++r;
     }
 
-    return poprawny_format;
+    return correct_format;
 }
 
-// zwraca true jesli ruch jest mozliwy do wykonania, false jesli nie
-bool mozliwyRuch(const int ruch[4], int p[8][8]) {
+// chcks if the given move follows the game rules
+bool isCorrectMove(const int move[4], int board[8][8]) {
 
-    int x1 = ruch[0];
-    int y1 = ruch[1];
-    int x2 = ruch[2];
-    int y2 = ruch[3];
+    int x1 = move[0];
+    int y1 = move[1];
+    int x2 = move[2];
+    int y2 = move[3];
     int dx = 0, dy = 0;
 
-    if (x1 == x2 && y1 == y2) // sprawdz czy ruch nie jest pusty
+    if (x1 == x2 && y1 == y2)
         return false;
 
-    if (p[x1][y1] != 2) // sprawdz czy pionek jest w tym miejscu
+    if (board[x1][y1] != 2)
         return false;
 
-    if (y1 == y2) { // wiersz
+    if (y1 == y2) {
         if (x1 < x2)
             dx = 1;
         else
             dx = -1;
     }
 
-    if (x1 == x2) { // kolumna
+    if (x1 == x2) {
         if (y1 < y2)
             dy = 1;
         else
             dy = -1;
     }
 
-    if (x1 + y1 == x2 + y2) { // przekatna '\'
+    if (x1 + y1 == x2 + y2) {
         if (x1 < x2) {
             dx = 1;
             dy = -1;
@@ -151,22 +157,21 @@ bool mozliwyRuch(const int ruch[4], int p[8][8]) {
         }
     }
 
-    if (x1 - y1 == x2 - y2) { // przekatna '/'
+    if (x1 - y1 == x2 - y2) {
         if (x1 < x2)
             dx = dy = 1;
         else
             dx = dy = -1;
     }
 
-    if (dx == 0 && dy == 0) // zaden ruch nie zostal znaleziony
+    if (dx == 0 && dy == 0)
         return false;
 
-    // sprawdz czy nie ma przeszkod
     do {
         x1 += dx;
         y1 += dy;
 
-        if (p[x1][y1] != 0)
+        if (board[x1][y1] != 0)
             return false;
 
     } while (x1 != x2 || y1 != y2);
@@ -174,170 +179,168 @@ bool mozliwyRuch(const int ruch[4], int p[8][8]) {
     return true;
 }
 
-// aktualizuje pozycje pionow
-void wykonajRuch(const int ruch[4], int piony[3][2], int p[8][8], const int gracz) {
+// updates pawns' positions
+void executeMove(const int move[4], int pawns[3][2], int board[8][8],
+                 const int player) {
 
-    p[ruch[0]][ruch[1]] = 0;
-    p[ruch[2]][ruch[3]] = gracz;
+    board[move[0]][move[1]] = 0;
+    board[move[2]][move[3]] = player;
 
-    for (int i = 0; i < 3; i++)
-        if (ruch[0] == piony[i][0] && ruch[1] == piony[i][1]) {
-            piony[i][0] = ruch[2];
-            piony[i][1] = ruch[3];
+    for (int i = 0; i < 3; i++) {
+        if (move[0] == pawns[i][0] && move[1] == pawns[i][1]) {
+            pawns[i][0] = move[2];
+            pawns[i][1] = move[3];
             break;
         }
+    }
 }
 
-// zwraca wartosc oceniajaca dany stan planszy wzgledem podanego gracza
-int ocenStan(const int p[8][8], const int piony[3][2], const int gracz) {
+// calculates the assessment vaulue of the current state for the given player
+int calculateStateValue(const int board[8][8], const int pawns[3][2],
+                        const int player) {
 
-    int wartosc_stanu = 0;
-    const int kierunek[8][2] = {{0, 1}, {1, 0},  {0, -1},  {-1, 0},
-                                {1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
-    const int meta[2][3][2] = {{{0, 7}, {1, 7}, {2, 7}}, {{5, 0}, {6, 0}, {7, 0}}};
+    int state_value = 0;
+    const int direction[8][2] = {{0, 1}, {1, 0},  {0, -1},  {-1, 0},
+                                 {1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
+    const int final_positions[2][3][2] = {{{0, 7}, {1, 7}, {2, 7}},
+                                          {{5, 0}, {6, 0}, {7, 0}}};
 
-    // dla kazdego pionka sprawdza w ile ruchow moze dotrzec do celu
-    for (int pion = 0; pion < 3; pion++) {
+    for (int pawn = 0; pawn < 3; pawn++) {
 
-        // algorytm BFS
         int d[8][8]{};
 
-        int pionek_x = piony[pion][0];
-        int pionek_y = piony[pion][1];
+        int pawn_x = pawns[pawn][0];
+        int pawn_y = pawns[pawn][1];
 
-        queue<pair<int, int>> kolejka;
-        kolejka.push(make_pair(pionek_x, pionek_y));
-        d[pionek_x][pionek_y] = 1;
+        queue<pair<int, int>> Q;
+        Q.push(make_pair(pawn_x, pawn_y));
+        d[pawn_x][pawn_y] = 1;
 
-        while (!kolejka.empty()) {
+        while (!Q.empty()) {
 
-            // bierze pierwszy element z kolejki
-            pionek_x = kolejka.front().first;
-            pionek_y = kolejka.front().second;
-            kolejka.pop();
+            pawn_x = Q.front().first;
+            pawn_y = Q.front().second;
+            Q.pop();
 
-            // dodaje do kolejki wszystkie mozliwe ruchy tego pionka
-            for (int nr_kierunku = 0; nr_kierunku < 8; nr_kierunku++) {
+            for (int direction_num = 0; direction_num < 8; direction_num++) {
 
-                int x = pionek_x;
-                int y = pionek_y;
-                int dx = kierunek[nr_kierunku][0];
-                int dy = kierunek[nr_kierunku][1];
-                while (sprawdzZakres(x + dx) && sprawdzZakres(y + dy) &&
-                       (p[x + dx][y + dy] == 0 || p[x + dx][y + dy] == gracz)) {
+                int x = pawn_x;
+                int y = pawn_y;
+                int dx = direction[direction_num][0];
+                int dy = direction[direction_num][1];
+                while (
+                    checkRange(x + dx) && checkRange(y + dy) &&
+                    (board[x + dx][y + dy] == 0 || board[x + dx][y + dy] == player)) {
                     x += dx;
                     y += dy;
 
                     if (d[x][y] == 0) {
-                        d[x][y] = d[pionek_x][pionek_y] + 1;
-                        kolejka.push(make_pair(x, y));
+                        d[x][y] = d[pawn_x][pawn_y] + 1;
+                        Q.push(make_pair(x, y));
                     }
                 }
             }
         }
 
-        // oblicz dystans do najblizszego pola koncowego
-        int najmniejszy_dystans = 10;
+        int shortest_path = 10;
 
         for (int i = 0; i < 3; i++) {
 
-            int meta_x = meta[gracz - 2][i][0];
-            int meta_y = meta[gracz - 2][i][1];
+            int final_position_x = final_positions[player - 2][i][0];
+            int final_position_y = final_positions[player - 2][i][1];
 
-            if (piony[pion][0] == meta_x && piony[pion][1] == meta_y)
-                wartosc_stanu -= 100;
+            if (pawns[pawn][0] == final_position_x &&
+                pawns[pawn][1] == final_position_y)
+                state_value -= 100;
 
-            if (d[meta_x][meta_y] != 0 && d[meta_x][meta_y] < najmniejszy_dystans)
-                najmniejszy_dystans = d[meta_x][meta_y];
+            if (d[final_position_x][final_position_y] != 0 &&
+                d[final_position_x][final_position_y] < shortest_path)
+                shortest_path = d[final_position_x][final_position_y];
         }
 
         // powieksz wartosc obecnego stanu
-        wartosc_stanu += najmniejszy_dystans;
+        state_value += shortest_path;
     }
 
-    return wartosc_stanu;
+    return state_value;
 }
 
-// znajduje optymalny ruch dla komputera
-void ruchKomputera(int ruch[4], int p[8][8], int czarne[3][2], int biale[3][2]) {
+// finds an optimal move for AI player
+void moveAI(int move[4], int board[8][8], int black_pawns[3][2],
+            int white_pawns[3][2]) {
 
-    int minimalna_wartosc = 1000;
-    const int kierunek[8][2] = {{0, 1}, {1, 0},  {0, -1},  {-1, 0},
-                                {1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
-    int znalezione_ruchy[100][4];
-    int liczba_ruchow = 0;
+    int min_value = 1000;
+    const int direction[8][2] = {{0, 1}, {1, 0},  {0, -1},  {-1, 0},
+                                 {1, 1}, {1, -1}, {-1, -1}, {-1, 1}};
+    int found_moves[100][4];
+    int moves_number = 0;
 
-    // sprawdz mozliwe ruchy we wszystkich kierunkach dla kazdego pionka
-    for (int pion = 0; pion < 3; pion++) {
-        for (int nr_kierunku = 0; nr_kierunku < 8; nr_kierunku++) {
+    for (int pawn = 0; pawn < 3; pawn++) {
+        for (int direction_num = 0; direction_num < 8; direction_num++) {
 
-            int x = czarne[pion][0];
-            int y = czarne[pion][1];
-            const int poprzednie_x = x;
-            const int poprzednie_y = y;
-            int dx = kierunek[nr_kierunku][0];
-            int dy = kierunek[nr_kierunku][1];
+            int x = black_pawns[pawn][0];
+            int y = black_pawns[pawn][1];
+            const int previous_x = x;
+            const int previous_y = y;
+            int dx = direction[direction_num][0];
+            int dy = direction[direction_num][1];
 
-            // wykonuje kolejne ruchy w danym kierunku
-            while (sprawdzZakres(x + dx) && sprawdzZakres(y + dy) &&
-                   p[x + dx][y + dy] == 0) {
+            while (checkRange(x + dx) && checkRange(y + dy) &&
+                   board[x + dx][y + dy] == 0) {
 
                 x += dx;
                 y += dy;
 
-                // wykonaj ruch
-                ruch[0] = poprzednie_x;
-                ruch[1] = poprzednie_y;
-                ruch[2] = x;
-                ruch[3] = y;
+                move[0] = previous_x;
+                move[1] = previous_y;
+                move[2] = x;
+                move[3] = y;
 
-                wykonajRuch(ruch, czarne, p, 3);
+                executeMove(move, black_pawns, board, 3);
 
-                // ocen stan planszy po wykonaniu danego ruchu
-                int wartosc = ocenStan(p, czarne, 3);
+                int value = calculateStateValue(board, black_pawns, 3);
 
-                // zapisz nowy najlepszy ruch lub kolejny o najlepszej wartosci
-                if (wartosc < minimalna_wartosc) {
+                if (value < min_value) {
 
-                    minimalna_wartosc = wartosc;
-                    liczba_ruchow = 1;
+                    min_value = value;
+                    moves_number = 1;
                     for (int i = 0; i < 4; i++)
-                        znalezione_ruchy[0][i] = ruch[i];
+                        found_moves[0][i] = move[i];
 
-                } else if (wartosc == minimalna_wartosc) {
+                } else if (value == min_value) {
 
-                    // dopisz kolejny ruch o tej samej wartosci
                     for (int i = 0; i < 4; i++)
-                        znalezione_ruchy[liczba_ruchow][i] = ruch[i];
-                    liczba_ruchow++;
+                        found_moves[moves_number][i] = move[i];
+                    moves_number++;
                 }
 
-                // wycofaj ruch
-                ruch[0] = x;
-                ruch[1] = y;
-                ruch[2] = poprzednie_x;
-                ruch[3] = poprzednie_y;
+                move[0] = x;
+                move[1] = y;
+                move[2] = previous_x;
+                move[3] = previous_y;
 
-                wykonajRuch(ruch, czarne, p, 3);
+                executeMove(move, black_pawns, board, 3);
             }
         }
     }
 
-    // jesli najlepszych ruchow jest wiele, wybierz losowo
-    int nr_ruchu = rand() % liczba_ruchow;
-    for (int i = 0; i < 4; i++)
-        ruch[i] = znalezione_ruchy[nr_ruchu][i];
+    int move_num = rand() % moves_number;
+    for (int i = 0; i < 4; i++) {
+        move[i] = found_moves[move_num][i];
+    }
 }
 
 
-// zwraca nr gracza jesli wygral, 0, jesli nie
-int sprawdzWygrana(const int p[8][8]) {
+// check if one of the players won
+int checkWinner(const int board[8][8]) {
 
-    if (p[0][7] == 2 && p[1][7] == 2 && p[2][7] == 2)
+    if (board[0][7] == 2 && board[1][7] == 2 && board[2][7] == 2) {
         return 2;
+    }
 
-    if (p[5][0] == 3 && p[6][0] == 3 && p[7][0] == 3)
+    if (board[5][0] == 3 && board[6][0] == 3 && board[7][0] == 3) {
         return 3;
+    }
 
     return 0;
 }
@@ -346,50 +349,52 @@ int main() {
 
     srand(time(NULL));
 
-    int p[8][8]{}; // plansza
-    int ruch[4];
-    int czarne[3][2] = {{0, 7}, {1, 7}, {2, 7}}; // aktualne pozycje czarnych pionow
-    int biale[3][2] = {{5, 0}, {6, 0}, {7, 0}};
-    nowaPlansza(p);
+    int board[8][8]{};
+    int move[4];
+    int black_pawns[3][2] = {{0, 7}, {1, 7}, {2, 7}};
+    int white_pawns[3][2] = {{5, 0}, {6, 0}, {7, 0}};
+    createBoard(board);
 
-    int zwyciezca = 0;
+    int winner = 0;
 
-    while (zwyciezca == 0) {
+    while (winner == 0) {
 
-        wyswietlPlansze(p);
+        displayBoard(board);
 
-        // wczytywanie ruchu gracza
-        bool poprawny_ruch = 0;
+        bool correct_move = 0;
 
-        while (poprawny_ruch == 0) {
+        while (correct_move == 0) {
 
-            wyswietlPlansze(p);
-            cout << "\n   (bialy) ";
+            displayBoard(board);
+            cout << "\033[1;34m";
+            cout << "\n   A: ";
+            cout << "\033[0m";
 
-            poprawny_ruch = wczytajRuch(ruch);
-            if (poprawny_ruch)
-                poprawny_ruch = mozliwyRuch(ruch, p);
+            correct_move = readInput(move);
+            if (correct_move)
+                correct_move = isCorrectMove(move, board);
         }
 
-        wykonajRuch(ruch, biale, p, 2);
+        executeMove(move, white_pawns, board, 2);
 
-        // ruch komputera
-        wyswietlPlansze(p);
-        cout << "\n   (czarny) " << endl;
+        displayBoard(board);
+        cout << "\033[1;31m";
+        cout << "\n   B: " << endl;
+        cout << "\033[0m";
         sleep(1);
 
-        ruchKomputera(ruch, p, czarne, biale);
-        wykonajRuch(ruch, czarne, p, 3);
+        moveAI(move, board, black_pawns, white_pawns);
+        executeMove(move, black_pawns, board, 3);
 
-        zwyciezca = sprawdzWygrana(p);
+        winner = checkWinner(board);
     }
 
-    wyswietlPlansze(p);
+    displayBoard(board);
 
-    if (zwyciezca == 2)
-        cout << "\n  ZWYCIESTWO\n\n";
+    if (winner == 2)
+        cout << "\n  You have won.\n\n";
     else
-        cout << "\n  PORAZKA\n\n";
+        cout << "\n  You have lost.\n\n";
 
     return 0;
 }
