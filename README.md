@@ -3,7 +3,7 @@ This is an implementation of a simple board game which allows a user to play aga
 * Each player has three pieces (`A` and `B`). They can move any number of squares vertically, horizontally or diagonally but cannot jump over or stand on obstacles (`#`) and other player's pieces.
 * The aim of the game is to put all three pieces on opponent's initial positions.
 
-The AI algorithm, which the computer uses to choose optimal moves, is based on a minimax rule. My main motivation for creating this project was the fact that I wanted to do some experiments with the algorithm, setting various parameters affecting its behaviour and observing the decisions made in edge cases.
+The AI algorithm, which the computer uses to choose optimal moves, is based on a minimax rule. My main motivation to create this project was the fact that I wanted to do some experiments with the algorithm, setting various parameters affecting its behaviour and observing the decisions made in edge cases.
 
 
 <a href="https://youtu.be/ps3A60N3758">
