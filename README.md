@@ -1,5 +1,5 @@
 # Board game AI
-This is an implementation of a simple board game which allows a user to play against a computer. The game rules are uncomplicated:
+This is an implementation of a simple board game which allows a user to play against a computer. The rules of the game are simple:
 * Each player has three pieces (`A` and `B`). They can move any number of squares vertically, horizontally or diagonally but cannot jump over or stand on obstacles (`#`) and other player's pieces.
 * The aim of the game is to put all three pieces on opponent's initial positions.
 
